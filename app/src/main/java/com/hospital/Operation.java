@@ -16,6 +16,9 @@ public class Operation extends Appointment {
     this.type = type;
   }
 
+  public Operationtype getType() {
+    return this.type;
+  }
   @Override
   public String Treat() {
     return "";
