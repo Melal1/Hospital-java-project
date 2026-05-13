@@ -6,12 +6,16 @@ enum Status {
   completed, canceled, scheduled, onGoing
 }
 
+enum Illness {
+    DIABETES, HYPERTENSION, INFLUENZA, ASTHMA, ARTHRITIS, ALZHEIMERS, PNEUMONIA, OSTEOPOROSIS, TUBERCULOSIS, CHOLERA, MALARIA, ANEMIA, BRONCHITIS, HEPATITIS;
+}
+
 abstract public class Appointment {
 
   private LocalDateTime startTime;
   private LocalDateTime endTime;
   private Status status;
-  private String illness;
+  private Illness illness;
   private boolean isOperation;
   private boolean isEmergency;
   private Paitent paitent;
@@ -61,11 +65,11 @@ abstract public class Appointment {
   public Status getStatus() {
     return status;
   }
-
-  public String getIllness() {
-    return illness;
+  
+  public Illness getIllness() {
+      return illness;
   }
-
+    
   public final Paitent getPaitent() {
     return paitent;
   }
