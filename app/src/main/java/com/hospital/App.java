@@ -1,11 +1,11 @@
 package com.hospital;
 
+import com.hospital.ui.HospitalGUI;
+import javafx.application.Application;
+
 public class App {
 
   public static void main(String[] args) {
-
-    System.out.println("Hi");
-    System.out.println("Ghaith");
-
+    Application.launch(HospitalGUI.class, args);
   }
 }

@@ -2,16 +2,20 @@ package com.hospital;
 
 public class SurgeonDoctor extends Doctor {
 
-  public SurgeonDoctor(int age, int id, String name) {
+  public enum Speciality {
+    Heart, Orthopedic, Neurological, Plastic
+  }
+
+  private Speciality speciality;
+
+  public SurgeonDoctor(int age, int id, String name, Speciality speciality) {
     super(age, id, name);
+    this.speciality = speciality;
   }
 
-  public boolean addOperation(Operation operation1) {
-    if (super.addAppointment(operation1)) {
-
-      return true;
-    }
-
-    return false;
+  @Override
+  public String getSpeciality() {
+    return speciality.name();
   }
+
 }

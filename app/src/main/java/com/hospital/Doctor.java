@@ -36,9 +36,30 @@ public abstract class Doctor {
     return this.name;
   }
 
+  public String getFormattedName() {
+    return "Dr." + name;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public void setAge(int age) {
+    this.age = age;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public PriorityQueue<Appointment> getAppointments() {
+    return appointments;
+  }
+
   private boolean hasConflict(Appointment appointment) {
     for (Appointment existing : appointments) {
-      if (appointment.getStartTime().isBefore(existing.getEndTime())
+      if (existing.getStatus() != Status.canceled &&
+          appointment.getStartTime().isBefore(existing.getEndTime())
           && appointment.getEndTime().isAfter(existing.getStartTime())) {
         return true;
       }
@@ -53,7 +74,8 @@ public abstract class Doctor {
       // emergency appointment.
       List<Appointment> overlapping = new ArrayList<>();
       for (Appointment existing : appointments) {
-        if (appointment.getStartTime().isBefore(existing.getEndTime())
+        if (existing.getStatus() != Status.canceled &&
+            appointment.getStartTime().isBefore(existing.getEndTime())
             && appointment.getEndTime().isAfter(existing.getStartTime())) {
           overlapping.add(existing);
         }
@@ -81,4 +103,7 @@ public abstract class Doctor {
     appointments.add(appointment);
     return true;
   }
+
+  public abstract String getSpeciality();
+
 }
