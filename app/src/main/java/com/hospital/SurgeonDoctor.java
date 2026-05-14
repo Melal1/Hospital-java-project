@@ -3,7 +3,7 @@ package com.hospital;
 public class SurgeonDoctor extends Doctor {
 
   public enum Speciality {
-    Heart
+    Heart, Orthopedic, Neurological, Plastic
   }
 
   private Speciality speciality;

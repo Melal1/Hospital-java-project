@@ -23,6 +23,10 @@ public class Paitent {
 
   }
 
+  public ArrayList<Appointment> getVisits() {
+    return visit;
+  }
+
   public String getId() {
     return id;
   }

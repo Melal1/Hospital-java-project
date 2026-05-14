@@ -12,7 +12,8 @@ abstract public class Appointment {
   private boolean isEmergency;
   private Paitent paitent;
 
-  public Appointment(String startTime, String endTime, boolean isOperation, boolean isEmergency, Paitent paitent, String illness) {
+  public Appointment(String startTime, String endTime, boolean isOperation, boolean isEmergency, Paitent paitent,
+      String illness) {
     this.endTime = LocalDateTime.parse(endTime);
     this.startTime = LocalDateTime.parse(startTime);
     this.status = Status.scheduled;
@@ -33,6 +34,10 @@ abstract public class Appointment {
   public void finish() {
 
     status = Status.completed;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
   }
 
   public void reschedule(long days) {
@@ -57,9 +62,6 @@ abstract public class Appointment {
   }
 
   public Status getStatus() {
-    if (status == Status.scheduled && LocalDateTime.now().isAfter(endTime)) {
-      status = Status.completed;
-    }
     return status;
   }
 
