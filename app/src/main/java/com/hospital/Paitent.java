@@ -16,27 +16,65 @@ public class Paitent implements Serializable {
         this.Name = name;
         this.Age = age;
         this.phoneNumber = phoneNumber;
+public class Paitent {
+  private String id;
+  private String name;
+  private int age;
+  private String phoneNumber;
+  private ArrayList<Appointment> visit = new ArrayList<>();
 
-    }
+  public Paitent(String id, String name, int age, String phoneNumber) {
+    this.id = id;
+    this.name = name;
+    this.age = age;
+    this.phoneNumber = phoneNumber;
 
     public void Addvisit(Appointment    appointment){
+  }
 
-        Visit.add(appointment);
+  public void addVisit(Appointment appointment) {
 
     }
     public String getId() {
         return Id;
     }
+    visit.add(appointment);
 
-    public String getName() {
-        return Name;
-    }
+  }
 
-    public int getAge() {
-        return Age;
-    }
+  public ArrayList<Appointment> getVisits() {
+    return visit;
+  }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
+  public String getId() {
+    return id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public int getAge() {
+    return age;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setAge(int age) {
+    this.age = age;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
 }

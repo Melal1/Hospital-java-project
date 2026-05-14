@@ -2,27 +2,20 @@ package com.hospital;
 
 public class SurgeonDoctor extends Doctor {
 
-  public SurgeonDoctor(int age, DoctorStatus doctorStatus, String id, String name) {
-    super(age, doctorStatus, id, name);
-
+  public enum Speciality {
+    Heart, Orthopedic, Neurological, Plastic
   }
 
-  public boolean addOperation(Operation operation1) {
-    if (super.AddAppointment(operation1)) {
+  private Speciality speciality;
 
-      return true;
-    }
-    return false;
-
+  public SurgeonDoctor(int age, int id, String name, Speciality speciality) {
+    super(age, id, name);
+    this.speciality = speciality;
   }
 
   @Override
-  public boolean addCheakUp(Check_UP Checkup) {
-    if (super.AddAppointment(Checkup)) {
-
-      return true;
-    }
-    return false;
-
+  public String getSpeciality() {
+    return speciality.name();
   }
+
 }

@@ -1,26 +1,21 @@
 package com.hospital;
 
-enum Operationtype {
-  Orthopedicsurgery,
-  Neurosurgery,
-  Cardiacsurgery
-
-}
-
 public class Operation extends Appointment {
 
   private Operationtype type;
 
-  public Operation(String OperationStart, String OperationEnd, Status status, boolean isOperation, Operationtype type) {
-    super(OperationStart, OperationEnd, status, isOperation);
+  public Operation(String startTime, String endTime, Status status, boolean isOperation, boolean isEmergency,
+      Operationtype type, Paitent paitent, Illness illness) {
+    super(startTime, endTime, isOperation, isEmergency, paitent, illness);
     this.type = type;
   }
 
-  public Operationtype getType() {
+  public final Operationtype getType() {
     return this.type;
   }
+
   @Override
   public String Treat() {
-    return "";
+    return "Doing operation for patient " + super.getPaitent();
   }
 }

@@ -1,60 +1,85 @@
 package com.hospital;
 
-import java.io.Serializable;
-import java.time.LocalTime;
-
-enum Status {
-  Completed, Canceled, Scheduled, On_Going
-}
+import java.time.LocalDateTime;
 
 abstract public class Appointment implements Serializable {
   private static final long serialVersionUID = 1L;
 
 
-  private LocalTime AppointmentStart;
-  private LocalTime AppointmentEnd;
+  private LocalDateTime startTime;
+  private LocalDateTime endTime;
   private Status status;
-  private String TypeDisease;
-  private boolean IsOperation;
+  private Illness illness;
+  private boolean isOperation;
+  private boolean isEmergency;
+  private Paitent paitent;
 
-  public Appointment(String AppointmentStartt, String AppointmentEndd, Status status, boolean isOperation) {
-    this.AppointmentEnd = LocalTime.parse(AppointmentEndd);
-    this.AppointmentStart = LocalTime.parse(AppointmentStartt);
-    this.status = status;
-    this.IsOperation = isOperation;
+  public Appointment(String startTime, String endTime, boolean isOperation, boolean isEmergency, Paitent paitent,
+      Illness illness) {
+    this.endTime = LocalDateTime.parse(endTime);
+    this.startTime = LocalDateTime.parse(startTime);
+    this.status = Status.scheduled;
+    this.isOperation = isOperation;
+    this.isEmergency = isEmergency;
+    this.paitent = paitent;
+    this.illness = illness;
   }
 
-  // The opertation start with illnese type with paitent
   abstract public String Treat();
 
-  void CanceledAppointment() {
+  public void cancel() {
 
-    status = Status.Canceled;
+    status = Status.canceled;
 
   }
 
-  void FinashAppointment() {
+  public void finish() {
 
-    status = Status.Completed;
+    status = Status.completed;
   }
 
-  public LocalTime getAppointmentStart() {
-    return AppointmentStart;
+  public void setStatus(Status status) {
+    this.status = status;
   }
 
-  public LocalTime getAppointmentEnd() {
-    return AppointmentEnd;
+  public void reschedule(long days) {
+    this.startTime = this.startTime.plusDays(days);
+    this.endTime = this.endTime.plusDays(days);
+  }
+
+  public LocalDateTime getStartTime() {
+    return startTime;
+  }
+
+  public LocalDateTime getEndTime() {
+    return endTime;
+  }
+
+  public void setStartTime(LocalDateTime startTime) {
+    this.startTime = startTime;
+  }
+
+  public void setEndTime(LocalDateTime endTime) {
+    this.endTime = endTime;
   }
 
   public Status getStatus() {
     return status;
   }
 
-  public String getTypeDisease() {
-    return TypeDisease;
+  public Illness getIllness() {
+    return illness;
+  }
+
+  public final Paitent getPaitent() {
+    return paitent;
   }
 
   public boolean isOperation() {
-    return IsOperation;
+    return isOperation;
+  }
+
+  public boolean isEmergency() {
+    return isEmergency;
   }
 }
