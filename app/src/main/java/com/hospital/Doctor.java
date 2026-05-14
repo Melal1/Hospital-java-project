@@ -1,25 +1,25 @@
 package com.hospital;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.io.Serializable;
 
- class AppointmentConflictException extends Exception {
+class AppointmentConflictException extends Exception {
   public AppointmentConflictException(String message) {
     super(message);
   }
 }
 
- class DoctorNotFoundException extends Exception {
+class DoctorNotFoundException extends Exception {
   public DoctorNotFoundException(String message) {
     super(message);
   }
 }
-enum DoctorStatus {
-public abstract class Doctor {
+
+public abstract class Doctor implements Serializable {
+  private static final long serialVersionUID = 1L;
   private int id;
   private int age;
   private boolean isAvailable;
@@ -38,26 +38,6 @@ public abstract class Doctor {
     return id;
   }
 
-
- public abstract class Doctor implements Serializable {
-   private static final long serialVersionUID = 1L;
-
-  String Id;
-  String Name;
-  int Age;
-  PriorityQueue<Appointment> appointments;
-
-  DoctorStatus doctorStatus;
-
-  public Doctor(int age, DoctorStatus doctorStatus, String id, String name) {
-    Age = age;
-    this.doctorStatus = doctorStatus;
-    Id = id;
-    Name = name;
-
-      this.appointments = new PriorityQueue<>(
-              (Comparator<Appointment> & Serializable) (a, b) -> a.getAppointmentStart().compareTo(b.getAppointmentStart())
-      );
   public int getAge() {
     return age;
   }
@@ -138,7 +118,6 @@ public abstract class Doctor {
     return true;
   }
 
-  public abstract boolean addCheakUp(Check_UP Checkup);
   public abstract String getSpeciality();
 
 }

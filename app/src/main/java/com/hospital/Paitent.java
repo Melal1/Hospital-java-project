@@ -4,19 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Paitent implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    private String Id;
-    private String Name;
-    private int Age;
-    private String phoneNumber;
-    private ArrayList <Appointment> Visit=new ArrayList <>();
-    public Paitent(String id, String name, int age, String phoneNumber) {
-        this.Id = id;
-        this.Name = name;
-        this.Age = age;
-        this.phoneNumber = phoneNumber;
-public class Paitent {
   private String id;
   private String name;
   private int age;
@@ -28,18 +15,11 @@ public class Paitent {
     this.name = name;
     this.age = age;
     this.phoneNumber = phoneNumber;
-
-    public void Addvisit(Appointment    appointment){
   }
 
   public void addVisit(Appointment appointment) {
 
-    }
-    public String getId() {
-        return Id;
-    }
     visit.add(appointment);
-
   }
 
   public ArrayList<Appointment> getVisits() {
