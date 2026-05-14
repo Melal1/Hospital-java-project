@@ -19,3 +19,6 @@ Session.vim
 .DS_Store
 Thumbs.db
 app/bin
+.direnv
+.envrc
+app/src/test/java/org/example
