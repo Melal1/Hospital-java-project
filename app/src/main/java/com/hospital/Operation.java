@@ -1,6 +1,7 @@
 package com.hospital;
 
 public class Operation extends Appointment {
+  private static final long serialVersionUID = 1L;
 
   private Operationtype type;
 

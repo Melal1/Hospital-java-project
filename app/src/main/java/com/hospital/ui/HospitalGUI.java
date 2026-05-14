@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 public class HospitalGUI extends Application {
 
+  private final Hospital hospital = new Hospital();
   private final ObservableList<Doctor> allDoctors = FXCollections.observableArrayList();
   private final ObservableList<Paitent> allPatients = FXCollections.observableArrayList();
 
@@ -92,6 +93,8 @@ public class HospitalGUI extends Application {
 
   @Override
   public void start(Stage primaryStage) {
+    allDoctors.addAll(hospital.getDoctors());
+    allPatients.addAll(hospital.getPatients());
 
     TabPane tabPane = new TabPane();
     tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -121,6 +124,12 @@ public class HospitalGUI extends Application {
 
     root.setTop(topBar);
     root.setCenter(tabPane);
+
+    primaryStage.setOnCloseRequest(e -> {
+      hospital.saveData();
+      System.out.println("Data saved on close.");
+    });
+
     Scene scene = new Scene(root, 950, 650);
     primaryStage.setTitle("Hospital Management System");
     primaryStage.setScene(scene);
@@ -298,6 +307,7 @@ public class HospitalGUI extends Application {
         // Update
         selected.setName(docName.getText());
         selected.setAge(age);
+        hospital.saveData();
         successMsg = "Doctor updated successfully!";
       } else {
         boolean exist = false;
@@ -323,6 +333,7 @@ public class HospitalGUI extends Application {
           newDoc = new GeneralDoctor(age, id, docName.getText());
         }
 
+        hospital.addDoctor(newDoc);
         allDoctors.add(newDoc);
         successMsg = "Doctor added successfully!";
       }
@@ -477,6 +488,7 @@ public class HospitalGUI extends Application {
           selected.setName(patName.getText());
           selected.setAge(age);
           selected.setPhoneNumber(patContact.getText());
+          hospital.saveData();
           mgmtPatList.refresh();
           patInfoLbl.setText(String.format("Name: %s | ID: %s | Age: %d | Contact: %s",
               selected.getName(), selected.getId(), selected.getAge(), selected.getPhoneNumber()));
@@ -488,6 +500,7 @@ public class HospitalGUI extends Application {
           patHistoryPanel.setVisible(true);
         } else {
           Paitent newPat = new Paitent(patId.getText(), patName.getText(), age, patContact.getText());
+          hospital.addPatient(newPat);
           allPatients.add(newPat);
           showAlert(Alert.AlertType.INFORMATION, "Patient added successfully!");
           mgmtPatList.getSelectionModel().select(newPat);
@@ -840,15 +853,15 @@ public class HospitalGUI extends Application {
           return;
         }
 
-        if (selectedDoctor.addAppointment(newAppt)) {
-          selectedPatient.addVisit(newAppt);
+        try {
+          hospital.makeAppointment(selectedDoctor, selectedPatient, newAppt);
           refreshDoctorList();
           refreshAppointmentList();
           showAlert(Alert.AlertType.INFORMATION, "Appointment successfully booked!");
           addAppointmentForm.setVisible(false);
           appointmentListContainer.setVisible(true);
-        } else {
-          showAlert(Alert.AlertType.ERROR, "Doctor has a scheduling conflict.");
+        } catch (BookingException be) {
+          showAlert(Alert.AlertType.ERROR, be.getMessage());
         }
       } catch (DateTimeParseException ex) {
         showAlert(Alert.AlertType.ERROR, "Invalid time format, Please use HH:mm (e.g. 08:30).");

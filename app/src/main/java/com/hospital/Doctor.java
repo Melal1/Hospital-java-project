@@ -30,7 +30,7 @@ public abstract class Doctor implements Serializable {
     this.age = age;
     this.id = id;
     this.name = name;
-    this.appointments = new PriorityQueue<>(Comparator.comparing(appointment -> appointment.getStartTime()));
+    this.appointments = new PriorityQueue<>((Serializable & Comparator<Appointment>) (a1, a2) -> a1.getStartTime().compareTo(a2.getStartTime()));
     this.isAvailable = true;
   }
 
