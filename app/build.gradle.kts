@@ -13,7 +13,7 @@ plugins {
 
 javafx {
     version = "21" // Use a version that matches your JDK (21 is stable)
-    modules("javafx.controls", "javafx.fxml")
+    modules("javafx.controls", "javafx.fxml", "javafx.graphics")
 }
 
 repositories {
