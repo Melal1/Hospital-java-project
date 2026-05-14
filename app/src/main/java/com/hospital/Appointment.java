@@ -46,6 +46,7 @@ abstract public class Appointment implements Serializable {
   public void reschedule(long days) {
     this.startTime = this.startTime.plusDays(days);
     this.endTime = this.endTime.plusDays(days);
+    this.status = Status.rescheduled;
   }
 
   public LocalDateTime getStartTime() {

@@ -1,5 +1,5 @@
 package com.hospital;
 
 public enum Status {
-  completed, canceled, scheduled, onGoing
+  completed, canceled, scheduled, onGoing, rescheduled
 }

@@ -2,6 +2,7 @@ package com.hospital.ui;
 
 import com.hospital.*;
 import java.util.List;
+import java.util.ArrayList;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Optional;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
 
 public class HospitalGUI extends Application {
 
-  private final Hospital hospital = new Hospital();
+  private Hospital hospital;
   private final ObservableList<Doctor> allDoctors = FXCollections.observableArrayList();
   private final ObservableList<Paitent> allPatients = FXCollections.observableArrayList();
 
@@ -93,6 +95,29 @@ public class HospitalGUI extends Application {
 
   @Override
   public void start(Stage primaryStage) {
+    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    alert.setTitle("Startup Mode");
+    alert.setHeaderText("Choose Startup Mode");
+    alert.setContentText("Do you want to start in Tutorial Mode with sample data, or Normal Mode?");
+
+    ButtonType btnNormal = new ButtonType("Normal Mode");
+    ButtonType btnTutorial = new ButtonType("Tutorial Mode");
+
+    alert.getButtonTypes().setAll(btnNormal, btnTutorial);
+
+    boolean isTutorial = false;
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.isPresent() && result.get() == btnTutorial) {
+      isTutorial = true;
+    }
+
+    if (isTutorial) {
+      hospital = new Hospital(false);
+      hospital.generateTutorialData();
+    } else {
+      hospital = new Hospital(true);
+    }
+
     allDoctors.addAll(hospital.getDoctors());
     allPatients.addAll(hospital.getPatients());
 
@@ -101,6 +126,7 @@ public class HospitalGUI extends Application {
 
     tabPane.getTabs().add(createManagementTab());
     tabPane.getTabs().add(createAppointmentsTab());
+    tabPane.getTabs().add(createMessagesTab());
 
     BorderPane root = new BorderPane();
 
@@ -716,6 +742,9 @@ public class HospitalGUI extends Application {
 
     apptIllness = new ComboBox<Illness>();
     apptIllness.setItems(FXCollections.observableArrayList(Illness.values()));
+    apptIllness.valueProperty().addListener((obs, oldVal, newVal) -> {
+      updateDoctorSelection();
+    });
     apptEmergencyCheck = new CheckBox("Is Emergency?");
 
     apptTypeCombo = new ComboBox<>(FXCollections.observableArrayList("Checkup", "Operation"));
@@ -756,12 +785,7 @@ public class HospitalGUI extends Application {
       apptSurgeryTypeLabel.setVisible(isOperation);
       apptSurgeryTypeLabel.setManaged(isOperation);
 
-      if (isOperation) {
-        doctorSelectionBox.setItems(FXCollections.observableArrayList(
-            allDoctors.stream().filter(d -> d instanceof SurgeonDoctor).collect(Collectors.toList())));
-      } else {
-        doctorSelectionBox.setItems(allDoctors);
-      }
+      updateDoctorSelection();
       updateSurgeryTypeCombo(doctorSelectionBox.getValue());
     });
 
@@ -771,7 +795,15 @@ public class HospitalGUI extends Application {
 
     Button bookBtn = new Button("Book Appointment");
     bookBtn.setStyle("-fx-base: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
+
+    Button smartBookBtn = new Button("Smart Book");
+    smartBookBtn.setStyle("-fx-base: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+
     Button cancelBookBtn = new Button("Cancel");
+
+    apptEmergencyCheck.setOnAction(e -> {
+      smartBookBtn.setDisable(apptEmergencyCheck.isSelected());
+    });
 
     form.addRow(0, new Label("Patient:"), patientSelectionBox);
     form.addRow(1, new Label("Start Time:"), new HBox(5, apptStartDate, apptStartTime));
@@ -780,7 +812,7 @@ public class HospitalGUI extends Application {
     form.addRow(4, new Label("Appt Type:"), apptTypeCombo, apptEmergencyCheck);
     form.addRow(5, new Label("Doctor:"), doctorSelectionBox);
     form.addRow(6, apptSurgeryTypeLabel, apptSurgeryTypeCombo);
-    form.add(new HBox(10, bookBtn, cancelBookBtn), 1, 7);
+    form.add(new HBox(10, bookBtn, smartBookBtn, cancelBookBtn), 1, 7);
 
     addAppointmentForm.getChildren().addAll(formTitle, form);
     addAppointmentForm.setVisible(false);
@@ -803,6 +835,56 @@ public class HospitalGUI extends Application {
     cancelBookBtn.setOnAction(e -> {
       addAppointmentForm.setVisible(false);
       appointmentListContainer.setVisible(true);
+    });
+
+    smartBookBtn.setOnAction(e -> {
+      Paitent selectedPatient = patientSelectionBox.getValue();
+      String apptType = apptTypeCombo.getValue();
+      Illness illness = apptIllness.getValue();
+
+      if (selectedPatient == null || apptType == null || illness == null) {
+        showAlert(Alert.AlertType.WARNING, "Please select Patient, Appt Type, and Illness/Reason.");
+        return;
+      }
+
+      boolean isOperation = "Operation".equals(apptType);
+
+      List<Doctor> suitableDoctors = allDoctors.stream()
+          .filter(d -> !isOperation || d instanceof SurgeonDoctor)
+          .filter(d -> d.canHandle(illness))
+          .filter(Doctor::isAvailable)
+          .collect(Collectors.toList());
+
+      if (suitableDoctors.isEmpty()) {
+        showAlert(Alert.AlertType.ERROR, "No suitable doctors available for this illness and type.");
+        return;
+      }
+
+      Doctor bestDoctor = suitableDoctors.stream()
+          .min(Comparator.comparingInt(d -> d.getAppointments().size()))
+          .orElse(null);
+
+      if (bestDoctor == null) {
+        showAlert(Alert.AlertType.ERROR, "Could not find a doctor.");
+        return;
+      }
+
+      doctorSelectionBox.setValue(bestDoctor);
+      updateSurgeryTypeCombo(bestDoctor);
+
+      Operationtype opType = null;
+      if (isOperation) {
+        opType = apptSurgeryTypeCombo.getValue();
+        if (opType == null && apptSurgeryTypeCombo.getItems().size() > 0) {
+          opType = apptSurgeryTypeCombo.getItems().get(0);
+          apptSurgeryTypeCombo.setValue(opType);
+        }
+      }
+
+      showSmartBookDialog(bestDoctor, selectedPatient, apptType, illness, opType, LocalDateTime.now(), () -> {
+        addAppointmentForm.setVisible(false);
+        appointmentListContainer.setVisible(true);
+      });
     });
 
     bookBtn.setOnAction(e -> {
@@ -983,6 +1065,52 @@ public class HospitalGUI extends Application {
     }
   }
 
+  private Tab createMessagesTab() {
+    Tab tab = new Tab("Messages");
+    VBox layout = new VBox(10);
+    layout.setPadding(new Insets(10));
+
+    Label title = new Label("Sent Messages (Rescheduling Notifications)");
+    title.setFont(Font.font("System", FontWeight.BOLD, 16));
+
+    ListView<Message> messageList = new ListView<>(FXCollections.observableArrayList(hospital.getMessages()));
+    messageList.setCellFactory(param -> new ListCell<Message>() {
+      @Override
+      protected void updateItem(Message item, boolean empty) {
+        super.updateItem(item, empty);
+        if (empty || item == null) {
+          setText(null);
+        } else {
+          DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+          setText(String.format("[%s] To: %s | %s",
+              item.getTimestamp().format(dtf), item.getPatientName(), item.getContent()));
+        }
+      }
+    });
+
+    Button refreshBtn = new Button("Refresh");
+    refreshBtn.setOnAction(e -> {
+      messageList.setItems(FXCollections.observableArrayList(hospital.getMessages()));
+    });
+
+    layout.getChildren().addAll(title, refreshBtn, messageList);
+    VBox.setVgrow(messageList, Priority.ALWAYS);
+    tab.setContent(layout);
+    return tab;
+  }
+
+  private void updateDoctorSelection() {
+    boolean isOperation = "Operation".equals(apptTypeCombo.getValue());
+    Illness selectedIllness = apptIllness.getValue();
+
+    List<Doctor> filtered = allDoctors.stream()
+        .filter(d -> !isOperation || d instanceof SurgeonDoctor)
+        .filter(d -> selectedIllness == null || d.canHandle(selectedIllness))
+        .collect(Collectors.toList());
+
+    doctorSelectionBox.setItems(FXCollections.observableArrayList(filtered));
+  }
+
   private void updateSurgeryTypeCombo(Doctor selectedDoctor) {
     if ("Operation".equals(apptTypeCombo.getValue())) {
       if (selectedDoctor instanceof SurgeonDoctor) {
@@ -1003,6 +1131,129 @@ public class HospitalGUI extends Application {
     } else {
       apptSurgeryTypeCombo.setItems(FXCollections.observableArrayList(Operationtype.values()));
     }
+  }
+
+  private static class TimeSlot {
+    LocalDateTime start;
+    long maxDurationMinutes;
+
+    public TimeSlot(LocalDateTime start, long maxDurationMinutes) {
+      this.start = start;
+      this.maxDurationMinutes = maxDurationMinutes;
+    }
+  }
+
+  private TimeSlot findNextAvailableSlot(Doctor doctor, LocalDateTime searchStart, int minDurationMinutes) {
+    int minute = searchStart.getMinute();
+    int mod = minute % 30;
+    LocalDateTime currentStart = searchStart;
+    if (mod != 0) {
+      currentStart = currentStart.plusMinutes(30 - mod).withSecond(0).withNano(0);
+    } else {
+      currentStart = currentStart.withSecond(0).withNano(0);
+    }
+
+    List<Appointment> appts = new ArrayList<>(doctor.getAppointments());
+    appts.removeIf(a -> a.getStatus() == Status.canceled);
+    appts.sort(Comparator.comparing(Appointment::getStartTime));
+
+    LocalDateTime finalCurrentStart = currentStart;
+    appts.removeIf(a -> !a.getEndTime().isAfter(finalCurrentStart));
+
+    for (Appointment appt : appts) {
+      if (currentStart.isBefore(appt.getStartTime())) {
+        long gap = java.time.Duration.between(currentStart, appt.getStartTime()).toMinutes();
+        if (gap >= minDurationMinutes) {
+          return new TimeSlot(currentStart, gap);
+        }
+      }
+
+      if (currentStart.isBefore(appt.getEndTime())) {
+        currentStart = appt.getEndTime();
+        minute = currentStart.getMinute();
+        mod = minute % 30;
+        if (mod != 0) {
+          currentStart = currentStart.plusMinutes(30 - mod);
+        }
+      }
+    }
+
+    return new TimeSlot(currentStart, 24 * 60);
+  }
+
+  private void showSmartBookDialog(Doctor bestDoctor, Paitent selectedPatient, String apptType, Illness illness,
+      Operationtype opType, LocalDateTime searchStart, Runnable onSuccess) {
+    TimeSlot slot = findNextAvailableSlot(bestDoctor, searchStart, 30);
+
+    Dialog<Integer> dialog = new Dialog<>();
+    dialog.setTitle("Smart Book - Time Found");
+    dialog.setHeaderText("Doctor " + bestDoctor.getFormattedName() + " is available.");
+
+    ButtonType acceptBtnType = new ButtonType("Accept & Book", ButtonBar.ButtonData.OK_DONE);
+    ButtonType findNextBtnType = new ButtonType("Find Next Available", ButtonBar.ButtonData.OTHER);
+    dialog.getDialogPane().getButtonTypes().addAll(acceptBtnType, findNextBtnType, ButtonType.CANCEL);
+
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    grid.setPadding(new Insets(20, 150, 10, 10));
+
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    grid.add(new Label("Found Start Time:"), 0, 0);
+    grid.add(new Label(slot.start.format(dtf)), 1, 0);
+
+    grid.add(new Label("Max Available Duration:"), 0, 1);
+    long maxHours = slot.maxDurationMinutes / 60;
+    long maxMins = slot.maxDurationMinutes % 60;
+    String durStr = (maxHours > 0 ? maxHours + "h " : "") + maxMins + "m"
+        + (slot.maxDurationMinutes >= 24 * 60 ? "+" : "");
+    grid.add(new Label(durStr), 1, 1);
+
+    grid.add(new Label("Desired Duration (mins):"), 0, 2);
+    Spinner<Integer> durationSpinner = new Spinner<>(30, Math.min((int) slot.maxDurationMinutes, 8 * 60), 30, 30);
+    durationSpinner.setEditable(true);
+    grid.add(durationSpinner, 1, 2);
+
+    dialog.getDialogPane().setContent(grid);
+
+    dialog.setResultConverter(dialogButton -> {
+      if (dialogButton == acceptBtnType) {
+        return durationSpinner.getValue();
+      }
+      if (dialogButton == findNextBtnType) {
+        return -1;
+      }
+      return null;
+    });
+
+    dialog.showAndWait().ifPresent(result -> {
+      if (result == -1) {
+        showSmartBookDialog(bestDoctor, selectedPatient, apptType, illness, opType, slot.start.plusMinutes(30),
+            onSuccess);
+      } else {
+        LocalDateTime end = slot.start.plusMinutes(result);
+        Appointment newAppt = null;
+        if ("Operation".equals(apptType)) {
+          newAppt = new Operation(slot.start.toString(), end.toString(), Status.scheduled, true, false, opType,
+              selectedPatient, illness);
+        } else {
+          newAppt = new CheckUp(slot.start.toString(), end.toString(), false, selectedPatient, illness);
+        }
+
+        try {
+          hospital.makeAppointment(bestDoctor, selectedPatient, newAppt);
+          refreshDoctorList();
+          refreshAppointmentList();
+          showAlert(Alert.AlertType.INFORMATION, "Smart booked successfully with " + bestDoctor.getFormattedName()
+              + " at " + slot.start.format(dtf) + "!");
+          if (onSuccess != null) {
+            onSuccess.run();
+          }
+        } catch (BookingException be) {
+          showAlert(Alert.AlertType.ERROR, be.getMessage());
+        }
+      }
+    });
   }
 
   private void showAlert(Alert.AlertType type, String msg) {

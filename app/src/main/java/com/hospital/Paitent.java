@@ -3,19 +3,25 @@ package com.hospital;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Paitent implements Serializable {
+public class Paitent implements Serializable, CanSendMessage {
   private static final long serialVersionUID = 1L;
   private String id;
   private String name;
   private int age;
   private String phoneNumber;
   private ArrayList<Appointment> visit = new ArrayList<>();
+  private ArrayList<Message> messages = new ArrayList<>();
 
   public Paitent(String id, String name, int age, String phoneNumber) {
     this.id = id;
     this.name = name;
     this.age = age;
     this.phoneNumber = phoneNumber;
+  }
+
+  @Override
+  public void sendMessage(String text) {
+    messages.add(new Message(this.name, text));
   }
 
   public void addVisit(Appointment appointment) {
@@ -25,6 +31,14 @@ public class Paitent implements Serializable {
 
   public ArrayList<Appointment> getVisits() {
     return visit;
+  }
+
+  public void addMessage(Message msg) {
+    messages.add(msg);
+  }
+
+  public ArrayList<Message> getMessages() {
+    return messages;
   }
 
   public String getId() {

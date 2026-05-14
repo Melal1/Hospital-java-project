@@ -25,6 +25,7 @@ public abstract class Doctor implements Serializable {
   private boolean isAvailable;
   private String name;
   private PriorityQueue<Appointment> appointments;
+  private List<Illness> supportedIllnesses;
 
   public Doctor(int age, int id, String name) {
     this.age = age;
@@ -32,6 +33,23 @@ public abstract class Doctor implements Serializable {
     this.name = name;
     this.appointments = new PriorityQueue<>((Serializable & Comparator<Appointment>) (a1, a2) -> a1.getStartTime().compareTo(a2.getStartTime()));
     this.isAvailable = true;
+    this.supportedIllnesses = new ArrayList<>();
+  }
+
+  public List<Illness> getSupportedIllnesses() {
+    return supportedIllnesses;
+  }
+
+  public void addSupportedIllness(Illness illness) {
+    if (!supportedIllnesses.contains(illness)) {
+      supportedIllnesses.add(illness);
+    }
+  }
+
+  public boolean canHandle(Illness illness) {
+    if (illness == null)
+      return true;
+    return supportedIllnesses.contains(illness);
   }
 
   public int getId() {
@@ -85,7 +103,6 @@ public abstract class Doctor implements Serializable {
 
     if (appointment.isEmergency()) {
 
-      // emergency appointment.
       List<Appointment> overlapping = new ArrayList<>();
       for (Appointment existing : appointments) {
         if (existing.getStatus() != Status.canceled &&
