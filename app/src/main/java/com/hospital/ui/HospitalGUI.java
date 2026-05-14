@@ -48,7 +48,7 @@ public class HospitalGUI extends Application {
   private TextField apptStartTime;
   private DatePicker apptEndDate;
   private TextField apptEndTime;
-  private TextField apptIllness;
+  private ComboBox<Illness> apptIllness;
   private CheckBox apptEmergencyCheck;
   private ComboBox<String> apptTypeCombo;
   private ComboBox<Operationtype> apptSurgeryTypeCombo;
@@ -282,8 +282,12 @@ public class HospitalGUI extends Application {
       try {
         id = Integer.parseInt(docId.getText());
         age = Integer.parseInt(docAge.getText());
+        if (id <= 0 || age <= 0) {
+          showAlert(Alert.AlertType.ERROR, "ID and Age must be positive numbers.");
+          return;
+        }
       } catch (NumberFormatException ex) {
-        showAlert(Alert.AlertType.ERROR, "ID and Age must be numbers.");
+        showAlert(Alert.AlertType.ERROR, "ID and Age must be valid numbers.");
         return;
       }
 
@@ -463,6 +467,10 @@ public class HospitalGUI extends Application {
       }
       try {
         int age = Integer.parseInt(patAge.getText());
+        if (age <= 0) {
+          showAlert(Alert.AlertType.ERROR, "Age must be a positive number.");
+          return;
+        }
         Paitent selected = mgmtPatList.getSelectionModel().getSelectedItem();
 
         if (selected != null) {
@@ -633,14 +641,13 @@ public class HospitalGUI extends Application {
     cancelApptBtn.setOnAction(e -> {
       Appointment selected = apptListView.getSelectionModel().getSelectedItem();
       if (selected != null) {
-        if (selected.getStatus() != Status.canceled || selected.getStatus() != Status.onGoing
-            || selected.getStatus() != Status.completed) {
+        if (selected.getStatus() == Status.scheduled) {
           selected.cancel();
           apptListView.refresh();
           refreshDoctorList();
           showAlert(Alert.AlertType.INFORMATION, "Appointment canceled.");
         } else {
-          showAlert(Alert.AlertType.INFORMATION, "Can't Cancel this Appointment");
+          showAlert(Alert.AlertType.INFORMATION, "Can't cancel an " + selected.getStatus().name() + " appointment.");
         }
       } else {
         showAlert(Alert.AlertType.WARNING, "Select an appointment to cancel.");
@@ -694,7 +701,8 @@ public class HospitalGUI extends Application {
     apptEndTime = new TextField("09:00");
     apptEndTime.setPromptText("HH:mm");
 
-    apptIllness = new TextField();
+    apptIllness = new ComboBox<Illness>();
+    apptIllness.setItems(FXCollections.observableArrayList(Illness.values()));
     apptEmergencyCheck = new CheckBox("Is Emergency?");
 
     apptTypeCombo = new ComboBox<>(FXCollections.observableArrayList("Checkup", "Operation"));
@@ -821,10 +829,10 @@ public class HospitalGUI extends Application {
             return;
           }
           newAppt = new Operation(start.toString(), end.toString(), Status.scheduled, true,
-              apptEmergencyCheck.isSelected(), opType, selectedPatient, apptIllness.getText());
+              apptEmergencyCheck.isSelected(), opType, selectedPatient, apptIllness.getValue());
         } else if ("Checkup".equals(apptType)) {
           newAppt = new CheckUp(start.toString(), end.toString(), apptEmergencyCheck.isSelected(),
-              selectedPatient, apptIllness.getText());
+              selectedPatient, apptIllness.getValue());
         }
 
         if (newAppt == null) {
@@ -843,7 +851,7 @@ public class HospitalGUI extends Application {
           showAlert(Alert.AlertType.ERROR, "Doctor has a scheduling conflict.");
         }
       } catch (DateTimeParseException ex) {
-        showAlert(Alert.AlertType.ERROR, "Invalid time format. Please use HH:mm (e.g. 08:30).");
+        showAlert(Alert.AlertType.ERROR, "Invalid time format, Please use HH:mm (e.g. 08:30).");
       }
     });
   }

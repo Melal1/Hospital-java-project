@@ -13,7 +13,7 @@ abstract public class Appointment {
   private Paitent paitent;
 
   public Appointment(String startTime, String endTime, boolean isOperation, boolean isEmergency, Paitent paitent,
-      String illness) {
+      Illness illness) {
     this.endTime = LocalDateTime.parse(endTime);
     this.startTime = LocalDateTime.parse(startTime);
     this.status = Status.scheduled;
@@ -64,11 +64,11 @@ abstract public class Appointment {
   public Status getStatus() {
     return status;
   }
-  
+
   public Illness getIllness() {
-      return illness;
+    return illness;
   }
-    
+
   public final Paitent getPaitent() {
     return paitent;
   }
