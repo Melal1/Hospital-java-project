@@ -2,10 +2,6 @@ package com.hospital;
 
 import java.time.LocalDateTime;
 
-enum Status {
-  completed, canceled, scheduled, onGoing
-}
-
 abstract public class Appointment {
 
   private LocalDateTime startTime;
@@ -16,23 +12,25 @@ abstract public class Appointment {
   private boolean isEmergency;
   private Paitent paitent;
 
-  public Appointment(String startTime, String endTime, boolean isOperation, boolean isEmergency) {
+  public Appointment(String startTime, String endTime, boolean isOperation, boolean isEmergency, Paitent paitent, String illness) {
     this.endTime = LocalDateTime.parse(endTime);
     this.startTime = LocalDateTime.parse(startTime);
     this.status = Status.scheduled;
     this.isOperation = isOperation;
     this.isEmergency = isEmergency;
+    this.paitent = paitent;
+    this.illness = illness;
   }
 
   abstract public String Treat();
 
-  void cancel() {
+  public void cancel() {
 
     status = Status.canceled;
 
   }
 
-  void finish() {
+  public void finish() {
 
     status = Status.completed;
   }
@@ -59,6 +57,9 @@ abstract public class Appointment {
   }
 
   public Status getStatus() {
+    if (status == Status.scheduled && LocalDateTime.now().isAfter(endTime)) {
+      status = Status.completed;
+    }
     return status;
   }
 

@@ -1,8 +1,8 @@
 package com.hospital;
 
 public class CheckUp extends Appointment {
-  public CheckUp(String startTime, String endTime, boolean isOperation, boolean isEmergency) {
-    super(startTime, endTime, isOperation, isEmergency);
+  public CheckUp(String startTime, String endTime, boolean isEmergency, Paitent paitent, String illness) {
+    super(startTime, endTime, false, isEmergency, paitent, illness);
   }
 
   @Override
