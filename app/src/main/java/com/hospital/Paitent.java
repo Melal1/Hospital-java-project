@@ -1,8 +1,11 @@
 package com.hospital;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Paitent {
+public class Paitent implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String Id;
     private String Name;
     private int Age;

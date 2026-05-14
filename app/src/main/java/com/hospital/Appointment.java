@@ -1,12 +1,15 @@
 package com.hospital;
 
+import java.io.Serializable;
 import java.time.LocalTime;
 
 enum Status {
   Completed, Canceled, Scheduled, On_Going
 }
 
-abstract public class Appointment {
+abstract public class Appointment implements Serializable {
+  private static final long serialVersionUID = 1L;
+
 
   private LocalTime AppointmentStart;
   private LocalTime AppointmentEnd;
