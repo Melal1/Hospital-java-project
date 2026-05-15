@@ -70,8 +70,19 @@ public class Hospital {
       patients = (ArrayList<Paitent>) ois.readObject();
       System.out.println(
           "Loaded " + doctors.size() + " doctors and " + patients.size() + " patients from " + file.getAbsolutePath());
+    } catch (java.io.EOFException e) {
+      System.err.println("Data file is empty or corrupted (EOF), Starting with empty data.");
+      doctors = new ArrayList<>();
+      patients = new ArrayList<>();
+    } catch (java.io.InvalidClassException e) {
+      System.err
+          .println("Data format changed (InvalidClassException,, Old data is incompatible, Starting with empty data.");
+      doctors = new ArrayList<>();
+      patients = new ArrayList<>();
     } catch (IOException | ClassNotFoundException e) {
       System.err.println("Error loading data from " + file.getAbsolutePath() + ": " + e.getMessage());
+      doctors = new ArrayList<>();
+      patients = new ArrayList<>();
       e.printStackTrace();
     }
   }
