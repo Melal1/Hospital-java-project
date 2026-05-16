@@ -6,18 +6,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.io.Serializable;
 
-class AppointmentConflictException extends Exception {
-  public AppointmentConflictException(String message) {
-    super(message);
-  }
-}
-
-class DoctorNotFoundException extends Exception {
-  public DoctorNotFoundException(String message) {
-    super(message);
-  }
-}
-
 public abstract class Doctor implements Serializable {
   private static final long serialVersionUID = 1L;
   private int id;
@@ -31,7 +19,8 @@ public abstract class Doctor implements Serializable {
     this.age = age;
     this.id = id;
     this.name = name;
-    this.appointments = new PriorityQueue<>((Serializable & Comparator<Appointment>) (a1, a2) -> a1.getStartTime().compareTo(a2.getStartTime()));
+    this.appointments = new PriorityQueue<>(
+        (Serializable & Comparator<Appointment>) (a1, a2) -> a1.getStartTime().compareTo(a2.getStartTime()));
     this.isAvailable = true;
     this.supportedIllnesses = new ArrayList<>();
   }

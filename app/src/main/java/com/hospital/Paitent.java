@@ -3,7 +3,7 @@ package com.hospital;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Paitent implements Serializable, CanSendMessage {
+public class Paitent implements Serializable, CanReceiveMsg {
   private static final long serialVersionUID = 1L;
   private String id;
   private String name;

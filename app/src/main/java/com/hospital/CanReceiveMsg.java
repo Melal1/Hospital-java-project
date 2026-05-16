@@ -1,7 +1,5 @@
 package com.hospital;
 
-public interface CanReciveMsg {
-
+public interface CanReceiveMsg {
   void sendMessage(String text);
-
 }
