@@ -148,4 +148,17 @@ public class Hospital {
     }
   }
 
+  public boolean removeDoc(Doctor d)
+  {
+    if(d.getAppoitnments().stream().anyMatch((appointment -> {
+      return (appointment.getStatus() != Status.completed && appointment.getStatus() != Status.canceled);
+    })))
+      return false;
+    if(!doctors.contains(d))
+      return false;
+
+    doctors.remove(d);
+    return true;
+  }
+
 }

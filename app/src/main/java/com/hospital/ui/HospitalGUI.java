@@ -185,7 +185,8 @@ public class HospitalGUI extends Application {
 
     Button addDocBtn = new Button("+ Add Doctor");
     Button editDocBtn = new Button("✎ Edit");
-    HBox docToolbar = new HBox(5, addDocBtn, editDocBtn);
+    Button remBtn = new Button("Remove Doctor");
+    HBox docToolbar = new HBox(5, addDocBtn, editDocBtn,remBtn);
 
     docListPanel.getChildren().addAll(docToolbar, mgmtDocList);
     VBox.setVgrow(mgmtDocList, Priority.ALWAYS);
@@ -250,7 +251,26 @@ public class HospitalGUI extends Application {
 
     docInfoPanel.getChildren().addAll(docFormTitle, docGrid);
 
-    editDocBtn.setOnAction(e -> {
+    remBtn.setOnAction(e ->{
+      Doctor newVal = mgmtDocList.getSelectionModel().getSelectedItem();
+      if(newVal == null)
+      {
+        showAlert(Alert.AlertType.WARNING,"You need to select a doctor first!!");
+        return;
+      }
+      if(hospital.removeDoc(newVal))
+      {
+        refreshDoctorList();
+        mgmtDocList.refresh();
+        allDoctors.remove(newVal);
+        showAlert(Alert.AlertType.INFORMATION,"Doctor has been deleted successfully");
+        return;
+      }
+
+      showAlert(Alert.AlertType.ERROR,"Doctor can't be removed because it has appointments");
+
+    } );
+    editDocBtn.setOnAction((e) -> {
       Doctor newVal = mgmtDocList.getSelectionModel().getSelectedItem();
       if (newVal != null) {
         docInfoPanel.setVisible(true);
@@ -364,8 +384,7 @@ public class HospitalGUI extends Application {
         successMsg = "Doctor added successfully!";
       }
 
-      refreshDoctorList();
-      mgmtDocList.refresh();
+
       showAlert(Alert.AlertType.INFORMATION, successMsg);
 
       docInfoPanel.setVisible(false);

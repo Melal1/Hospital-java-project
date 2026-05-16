@@ -25,6 +25,10 @@ public abstract class Doctor implements Serializable {
     this.supportedIllnesses = new ArrayList<>();
   }
 
+  PriorityQueue<Appointment> getAppoitnments()
+  {
+    return appointments;
+  }
   public List<Illness> getSupportedIllnesses() {
     return supportedIllnesses;
   }
